@@ -144,13 +144,13 @@
 
 
 ### 결과
-    1. client에서 보내는 request 입력 및 server로 부터 온 response 출력
+1. client에서 보내는 request 입력 및 server로 부터 온 response 출력
 ![client](./readme_img/client.png)
 
-    2. server로 접속된 socket 및 client request에 대한 response 출력
+2. server로 접속된 socket 및 client request에 대한 response 출력
 ![server](./readme_img/server.png)
 
-    3. wireshark를 통해 보이는 client와 server(10000)간 통신
+ 3. wireshark를 통해 보이는 client와 server(10000)간 통신
 ![wireshark1](./readme_img/wireshark1.png)
 ![wireshark2](./readme_img/wireshark2.png)
 ![wireshark3](./readme_img/wireshark3.png)
