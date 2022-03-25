@@ -44,7 +44,7 @@ with socket(AF_INET, SOCK_STREAM) as server_socket:
     print("소켓이 대기중 입니다...")
 
     while True:
-        client_socket, client_addr = server_socket.accept()  # 실제 소켓 연결 시 반환되는 실제 통신용 연결된 소켓과 연결주소 할당
+        client_socket, client_addr = server_socket.accept()  # 소켓이 연결 될 떄 client의 소켓과 주소 반환
         print(str(client_addr), "에서 접속 완료!")
 
         data = client_socket.recv(SIZE).decode('utf-8').split(',')  # client에서 보내는 데이터 받기

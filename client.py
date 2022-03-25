@@ -7,7 +7,7 @@ SIZE = 1024
 
 while True:
     with socket(AF_INET, SOCK_STREAM) as client_socket:
-        client_socket.connect((IP, PORT))  # 생성한 소켓에 HOST와 PORT 바인딩
+        client_socket.connect((IP, PORT))  # 생성한 소켓에 HOST와 PORT 연결
 
         method = input("Input method (GET, POST, PUT, HEAD): ")
         url = input('Input URL : ')
