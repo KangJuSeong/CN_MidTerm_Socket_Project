@@ -1,16 +1,9 @@
 from socket import *
 import time
-format = """HTTP/1.1 200 OK\n
-            Content-Type: text/html\n
-            ConnectionType: keep-alive\n
-            Content-Length: 1\n
-            Date: Wed, 10 Aug 2016 09:23:12 GMT\n\n
 
-            body
-        """
 
 HOST = "127.0.0.1"
-PORT = 10001
+PORT = 10000
 SIZE = 1024
 
 CONTINUE = 0
@@ -32,7 +25,7 @@ def response_formating(status_code, status_msg, body=''):
     date = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime(time.time()))
     return f"HTTP/1.1 {status_code} {status_msg}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\nDate: {date}\r\n\n{body}"
 
-def _response(status, body=''):
+def response(status, body=''):
     if status == CONTINUE:
         return response_formating(STATUS_CODE[CONTINUE], STATUS_MESSAGE[CONTINUE], body)
     if status == OK:
@@ -52,43 +45,45 @@ def router(url, method, body):
             if method == 'HEAD': return head()
             if path == 'index.html':
                 if method == 'GET': return get()
-                else: return _response(BAD_REQUEST)
+                else: return response(BAD_REQUEST)
             elif path == 'create':
                 if method == 'POST': return post(body)
-                else: return _response(BAD_REQUEST)
+                else: return response(BAD_REQUEST)
             elif path == 'update':
                 if method == 'PUT': return put(body)
-                else: return _response(BAD_REQUEST)
-            else: return _response(NOT_FOUND)
+                else: return response(BAD_REQUEST)
+            else: return response(NOT_FOUND)
         else:
             return ''
     else:
-        return _response(NOT_FOUND)
+        return response(NOT_FOUND)
 
 def get():
-    return _response(OK, body='index.html')
+    return response(OK, body='index.html')
 
 def head():
-    return _response(CONTINUE) 
+    return response(CONTINUE) 
 
 def post(body):
-    k, v = body.split(':')
-    if type(k) is str and type(v) is str:
+    body = body.split(':')
+    if len(body) == 2:
+        k, v = body[0], body[1]
         DB_DATA[k] = v
-        return _response(CREATED, body=str(DB_DATA))
+        return response(CREATED, body=str(DB_DATA))
     else:
-        return _response(BAD_REQUEST)
+        return response(BAD_REQUEST)
 
 def put(body):
-    k, v = body.split(':')
-    if type(k) is str and type(v) is str:
-        if k in DB_DATA.keys():
+    body = body.split(':')
+    if len(body) == 2:
+        k, v = body[0], body[1]
+        if body[0] in DB_DATA.keys():
             DB_DATA[k] = v
-            return _response(OK, body=str(DB_DATA))
+            return response(OK, body=str(DB_DATA))
         else:
-            return _response(BAD_REQUEST, body='Not Exist Data')
+            return response(BAD_REQUEST, body='Not Exist Data')
     else:
-        return _response(BAD_REQUEST)
+        return response(BAD_REQUEST)
 
 
 with socket(AF_INET, SOCK_STREAM) as server_socket:
@@ -104,6 +99,6 @@ with socket(AF_INET, SOCK_STREAM) as server_socket:
         method = find_http_method(data[0])
         url = data[1][6:-1]
         body = data[-1]
-        response = router(url, method, body)
+        res = router(url, method, body)
 
-        client_socket.send(response.encode('utf-8'))  # 데이터 인코딩하여 보내기
+        client_socket.send(res.encode('utf-8'))  # 데이터 인코딩하여 보내기
