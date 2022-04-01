@@ -1,5 +1,5 @@
 # CN_MidTerm_Socket_Project
-## TCP 기반 소켓 프로그램을 작성하고 HTTP 프로토콜 방식 사용하여 Request/Response 구현
+## TCP 기반 소켓 프로그램을 작성하고 HTTP1.1 프로토콜 방식 사용하여 Request/Response 구현
 
 ### 구조
 
@@ -9,64 +9,147 @@
 - server에 연결된 client는 HTTP method와 url 주소를 보내서 응답 요청 (request)
 - server에서는 client로부터 받은 HTTP method와 url을 검사하여 적절한 응답을 client로 전송 (response)
 - client는 server로부터 받은 응답을 출력
-- server에서 client로부터 잘못된 요청에 대한 응답은 400, 정상적인 요청에 대한 응답은 200(201)으로 응답
+- server에서 client로부터 요청에 대한 적절한 응답 코드와 응답 메시지 보내기
     
 ### 코드
 
 1. server.py
 
-    - socket 통신에 필요한 모듈 import
+    - socket 통신에 필요한 모듈 가져오기
+    - HTTP header에 들어갈 날짜를 가져올 모듈 가져오기
         ```python
         form socket import *
-        ```
-
-
-    - 각각의 GET, POST, PUT, HEAD 메소드에 맞는 함수 작성
-    - 각각의 메소드에서 url을 검사하여 유효한 접근인지 판단
-    - 만약 잘못된 접근일 경우 BAD REQUEST를 리턴
-
-        ```python
-        def get(url):
-            if url == SERVER_URL:
-                response = STATUS_CODE_OK
-            else:
-                response = STATUS_CODE_BAD
-            return response
-
-        def post(url):
-            if url == SERVER_URL + '/create':
-                response = STATUS_CODE_CREATED
-            else:
-                response = STATUS_CODE_BAD
-            return response
-
-        def head(url):
-            if url == SERVER_URL + '/option':
-                response = STATUS_CODE_OK
-            else:
-                response = STATUS_CODE_BAD
-            return response
-
-        def put(url):
-            if url == SERVER_URL + '/update':
-                response = STATUS_CODE_OK
-            else:
-                response = STATUS_CODE_BAD
-            return response
+        import time
         ```
 
 
     - host와 port, size를 변수에 저장
-    - server에서 유효하다고 판단하기 위한 url 주소를 SERVER_URL에 저장
-    - status code를 각각의 변수에 저장
+    - status code와 status message를 배열에 저장
+    - status code와 status message를 indexing 하기 위한 변수 선언
+    - `POST`와 `PUT` method를 통해 데이터를 추가하고 변경할 때 이용할 DB_DATA 딕셔너리 선언
         ```python
         HOST = "127.0.0.1"
         PORT = 10000
         SIZE = 1024
-        SERVER_URL = "test.com"
-        STATUS_CODE_OK = 'HTTP/200 OK'
-        STATUS_CODE_BAD = 'HTTP/400 BAD REQUEST'
-        STATUS_CODE_CREATED = 'HTTP/201 CREATED'
+
+        CONTINUE = 0
+        OK = 1
+        CREATED = 2
+        BAD_REQUEST = 3
+        NOT_FOUND = 4
+        STATUS_CODE = ['100', '200', '201', '400', '404']
+        STATUS_MESSAGE = ['CONTINUE', 'OK', 'CREATED', 'BAD_REQUEST', 'NOT_FOUND']
+
+        DB_DATA = {}
+        ```
+
+
+    - 매개변수로 받은 문자열에서 HTTP method를 추출하는 함수
+        ```python
+        def find_http_method(line):
+            line = line.split(' ')
+            return line[0]
+        ```
+
+
+    - 매개변수로 status code와 status message 그리고 body에 들어갈 값 가져오기
+    - 가져온 값을 HTTP1.1 response 양식에 대입하고 해당 response를 return 해주는 함수
+        ```python
+        def response_formating(status_code, status_msg, body=''):
+            date = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime(time.time()))
+            return f"HTTP/1.1 {status_code} {status_msg}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\nDate: {date}\r\n\n{body}"
+        ```
+
+
+    - 매개변수로 status와 body를 받아와서 해당 상태에 적절한 response를 return 해주는 함수
+        ```python
+        def response(status, body=''):
+            if status == CONTINUE:
+                return response_formating(STATUS_CODE[CONTINUE], STATUS_MESSAGE[CONTINUE], body)
+            if status == OK:
+                return response_formating(STATUS_CODE[OK], STATUS_MESSAGE[OK], body)
+            elif status == CREATED:
+                return response_formating(STATUS_CODE[CREATED], STATUS_MESSAGE[CREATED], body)
+            elif status == BAD_REQUEST:
+                return response_formating(STATUS_CODE[BAD_REQUEST], STATUS_MESSAGE[BAD_REQUEST], body)
+            if status == NOT_FOUND:
+                return response_formating(STATUS_CODE[NOT_FOUND], STATUS_MESSAGE[NOT_FOUND], body)
+        ```
+
+
+    - client로 부터 들어온 request를 적절한 path와 method에 연결시켜주는 함수
+    - 존재하지 않는 path가 요청되거나 잘못된 method 요청에 대한 처리를 해주는 기능 구현
+        ```python
+        def router(url, method, body):
+            if '/' in url:
+                host, path = url.split('/')
+                if host == HOST:
+                    if method == 'HEAD': return head()
+                    if path == 'index.html':
+                        if method == 'GET': return get()
+                        else: return response(BAD_REQUEST)
+                    elif path == 'create':
+                        if method == 'POST': return post(body)
+                        else: return response(BAD_REQUEST)
+                    elif path == 'update':
+                        if method == 'PUT': return put(body)
+                        else: return response(BAD_REQUEST)
+                    else: return response(NOT_FOUND)
+                else:
+                    return ''
+            else:
+                return response(NOT_FOUND)
+        ```
+
+
+    - index.html에 대한 path와 GET method 요청이 들어왔을 때 실행되는 함수
+    - body에 index.html 문자열을 넣고 응답
+    - status는 OK
+        ```python
+        def get():
+            return response(OK, body='index.html')
+        ```
+
+
+    - HEAD method에 대한 응답 함수
+    - body에 추가적인 데이터가 없고 HTTP header만을 보내주고 status 는 CONTINUE
+        ```python
+        def head():
+            return response(CONTINUE) 
+        ```
+
+
+    - POST method에 대한 응답 함수
+    - POST는 새로운 데이터를 추가하려는 의미로 DB_DATA 딕셔너리에 body로 들어온 데이터를 삽입
+    - body로 들어온 데이터의 양식이 `key:value`형태가 아니라면 잘못된 요청으로 판단하여 BAD_REQUEST를 return
+    - 데이터가 성공적으로 삽입되었다면 OK를 return
+        ```python
+        def post(body):
+            k, v = body.split(':')
+            if type(k) is str and type(v) is str:
+                DB_DATA[k] = v
+                return response(CREATED, body=str(DB_DATA))
+            else:
+                return response(BAD_REQUEST)
+        ```
+
+
+    - PUT method에 대한 응답 함수
+    - PUT은 기존에 있는 데이터를 변경하는 의미로 DB_DATA 딕셔너리에 body로 들어온 데이터로 수정
+    - body로 들어온 데이터의 양식이 `key:value`형태가 아니라면 잘못된 요청으로 판단하여 BAD_REQUEST를 return 
+    - body로 들어온 데이터에서 key 값이 DB_DATA에 존재하지 않으면 수정할 수 없으므로 BAD_REQUEST를 return
+    - 데이터가 성공적으로 변경되었다면 OK를 return
+        ```python
+        def put(body):
+            k, v = body.split(':')
+            if type(k) is str and type(v) is str:
+                if k in DB_DATA.keys():
+                    DB_DATA[k] = v
+                    return response(OK, body=str(DB_DATA))
+                else:
+                    return response(BAD_REQUEST, body='Not Exist Data')
+            else:
+                return response(BAD_REQUEST)
         ```
 
 
@@ -76,33 +159,26 @@
         with socket(AF_INET, SOCK_STREAM) as server_socket:
             server_socket.bind((HOST, PORT))  # 생성한 소켓에 HOST와 PORT 바인딩
             server_socket.listen(1)  # 소켓 연결 대기 상태
-            print("소켓이 대기중 입니다...")
         ```
     
 
     - `accept()` 메소드를 통해 연결된 client의 socket과 address 저장
-    - `recv(SIZE)` 메소드를 통해 client에서 보낸 HTTP method와 url을 가져온 후 저장
-    - method에 맞는 HTTP method 함수 호출
-    - `send(response)` 메소드를 통해 요청에 대한 알맞은 응답을 client로 전송
+    - `recv(SIZE)` 메소드를 통해 client에서 보낸 HTTP request를 data변수에 저장
+    - data 변수에서 client가 요청한 HTTP method, Host, body 정보를 추출
+    - 추출한 method, url, body 를 `router()` 함수에 넣고 적잘한 response를 return 받아 res 변수에 저장
+    - `send(res)` 메소드를 통해 요청에 대한 적절한 응답을 client로 전송
         ```python
             while True:
                 client_socket, client_addr = server_socket.accept()  # 소켓이 연결 될 떄 client의 소켓과 주소 반환
-                print(str(client_addr), "에서 접속 완료!")
-
-                data = client_socket.recv(SIZE).decode('utf-8').split(',')  # client에서 보내는 데이터 받기
-                method, url = data[0], data[1]
-
-                if method == 'GET':
-                    response = get(url)
                 
-                elif method == 'POST':
-                    response = post(url)
+                data = client_socket.recv(SIZE).decode('utf-8')  # client에서 보내는 데이터 받기
+                print(data)
+                data = data.split('\n')
+                method = find_http_method(data[0])
+                url = data[1][6:-1]
+                body = data[-1]
+                res = router(url, method, body)
 
-                elif method == 'HEAD':
-                    response = head(url)
-                else:
-                    response = put(url)
-                print(f"Request Method/URL : {method} {url} - {response}")
                 client_socket.send(response.encode('utf-8'))  # 데이터 인코딩하여 보내기
         ```
 
@@ -112,6 +188,23 @@
     - socket 통신에 필요한 모듈 import
         ```python
         form socket import *
+        ```
+
+
+    - 연결할 서버의 IP와 PORT를 변수에 저장
+    - 데이터 사이즈를 SIZE 변수에 저장
+        ```python
+        IP = "127.0.0.1"
+        PORT = 10000
+        SIZE = 1024
+        ```
+
+
+    - 유저가 요청하는 method와 url 그리고 body 데이터를 매개변수로 받기
+    - 받은 값들을 HTTP1.1 포맷에 담아 request 데이터를 return 해주는 함수
+        ```python
+        def request_formating(method, body, url):
+            return f"{method} / HTTP/1.1\r\nHost: {url}\r\nAccept: text/html\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
         ```
 
 
