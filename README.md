@@ -221,6 +221,10 @@
             },
             {'url': '127.0.0.1/create',
             'method': 'POST',
+            'body': 'address:seongbukgu'
+            },
+            {'url': '127.0.0.1/create',
+            'method': 'POST',
             'body': 'test'
             },
             {'url': '127.0.0.1/update',
