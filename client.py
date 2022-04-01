@@ -43,7 +43,7 @@ test_case = [
     }
 ]
 def request_formating(method, body, url):
-    return f"{method} / HTTP/1.1\r\nHost: {url}\r\nAccept: text/html\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
+    return f"{method} / HTTP/1.1\r\nHost: {url}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
 
 for test in test_case:
     with socket(AF_INET, SOCK_STREAM) as client_socket:
