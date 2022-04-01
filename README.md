@@ -20,8 +20,8 @@
         ```python
         form socket import *
         import time
-        ```
-
+        ```  
+  
 
     - host와 port, size를 변수에 저장
     - status code와 status message를 배열에 저장
@@ -41,16 +41,16 @@
         STATUS_MESSAGE = ['CONTINUE', 'OK', 'CREATED', 'BAD_REQUEST', 'NOT_FOUND']
 
         DB_DATA = {}
-        ```
-
+        ```  
+  
 
     - 매개변수로 받은 문자열에서 HTTP method를 추출하는 함수
         ```python
         def find_http_method(line):
             line = line.split(' ')
             return line[0]
-        ```
-
+        ```  
+  
 
     - 매개변수로 status code와 status message 그리고 body에 들어갈 값 가져오기
     - 가져온 값을 HTTP1.1 response 양식에 대입하고 해당 response를 return 해주는 함수
@@ -58,8 +58,8 @@
         def response_formating(status_code, status_msg, body=''):
             date = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime(time.time()))
             return f"HTTP/1.1 {status_code} {status_msg}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\nDate: {date}\r\n\n{body}"
-        ```
-
+        ```  
+  
 
     - 매개변수로 status와 body를 받아와서 해당 상태에 적절한 response를 return 해주는 함수
         ```python
@@ -74,8 +74,8 @@
                 return response_formating(STATUS_CODE[BAD_REQUEST], STATUS_MESSAGE[BAD_REQUEST], body)
             if status == NOT_FOUND:
                 return response_formating(STATUS_CODE[NOT_FOUND], STATUS_MESSAGE[NOT_FOUND], body)
-        ```
-
+        ```  
+  
 
     - client로 부터 들어온 request를 적절한 path와 method에 연결시켜주는 함수
     - 존재하지 않는 path가 요청되거나 잘못된 method 요청에 대한 처리를 해주는 기능 구현
@@ -99,8 +99,8 @@
                     return ''
             else:
                 return response(NOT_FOUND)
-        ```
-
+        ```  
+  
 
     - index.html에 대한 path와 GET method 요청이 들어왔을 때 실행되는 함수
     - body에 index.html 문자열을 넣고 응답
@@ -108,16 +108,16 @@
         ```python
         def get():
             return response(OK, body='index.html')
-        ```
-
+        ```  
+  
 
     - HEAD method에 대한 응답 함수
     - body에 추가적인 데이터가 없고 HTTP header만을 보내주고 status 는 CONTINUE
         ```python
         def head():
             return response(CONTINUE) 
-        ```
-
+        ```  
+  
 
     - POST method에 대한 응답 함수
     - POST는 새로운 데이터를 추가하려는 의미로 DB_DATA 딕셔너리에 body로 들어온 데이터를 삽입
@@ -131,8 +131,8 @@
                 return response(CREATED, body=str(DB_DATA))
             else:
                 return response(BAD_REQUEST)
-        ```
-
+        ```  
+  
 
     - PUT method에 대한 응답 함수
     - PUT은 기존에 있는 데이터를 변경하는 의미로 DB_DATA 딕셔너리에 body로 들어온 데이터로 수정
@@ -150,8 +150,8 @@
                     return response(BAD_REQUEST, body='Not Exist Data')
             else:
                 return response(BAD_REQUEST)
-        ```
-
+        ```  
+  
 
     - 지정한 HOST와 PORT를 이용하여 socket을 생성
     - `listen(1)` 메서드를 통해 socket 대기 상태
@@ -159,8 +159,8 @@
         with socket(AF_INET, SOCK_STREAM) as server_socket:
             server_socket.bind((HOST, PORT))  # 생성한 소켓에 HOST와 PORT 바인딩
             server_socket.listen(1)  # 소켓 연결 대기 상태
-        ```
-    
+        ```  
+  
 
     - `accept()` 메소드를 통해 연결된 client의 socket과 address 저장
     - `recv(SIZE)` 메소드를 통해 client에서 보낸 HTTP request를 data변수에 저장
@@ -180,16 +180,16 @@
                 res = router(url, method, body)
 
                 client_socket.send(response.encode('utf-8'))  # 데이터 인코딩하여 보내기
-        ```
-
+        ```  
+  
 
 2. client.py
 
     - socket 통신에 필요한 모듈 import
         ```python
         form socket import *
-        ```
-
+        ```  
+  
 
     - 연결할 서버의 IP와 PORT를 변수에 저장
     - 데이터 사이즈를 SIZE 변수에 저장
@@ -197,8 +197,9 @@
         IP = "127.0.0.1"
         PORT = 10000
         SIZE = 1024
-        ```
+        ```  
 
+  
     - test_case 배열에 딕셔너리 형태의 method, url, body를 담은 test case를 저장
         ```python
         test_case = [
@@ -235,16 +236,16 @@
             'body': 'test:test'
             }
         ]
-        ```
-
+        ```  
+  
 
     - 유저가 요청하는 method와 url 그리고 body 데이터를 매개변수로 받기
     - 받은 값들을 HTTP1.1 포맷에 담아 request 데이터를 return 해주는 함수
         ```python
         def request_formating(method, body, url):
             return f"{method} / HTTP/1.1\r\nHost: {url}\r\nAccept: text/html\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
-        ```
-
+        ```  
+  
 
     - request 데이터를 갖고있는 test_case 개수만큼 반복 실행
     - 소켓을 생성하고 IP와 PORT를 설정하여 server socket에 연결
@@ -252,8 +253,8 @@
             for test in test_case:
                 with socket(AF_INET, SOCK_STREAM) as client_socket:
                     client_socket.connect((IP, PORT))  # 생성한 소켓에 HOST와 PORT 연결
-        ```
-
+        ```  
+  
 
     - server로 요청할 request test case를 `request_formating()` 함수에 인자로 삽입
     - `request_formating()` 함수에서 반환된 값을 request 변수에 저장
@@ -264,8 +265,8 @@
                     body = test['body']
                     request = request_formating(method, body, url)
                     client_socket.send(request.encode('utf-8'))
-        ```
-
+        ```  
+  
 
     - server로 부터 돌아온 응답을 `recv()` 메소드를 통해 받아오기
     - 받아온 response 출력 후 socket 종료
@@ -273,8 +274,8 @@
                     data = client_socket.recv(SIZE).decode('utf-8')
                     print("Response data : ", data)
                     client_socket.close()
-        ```
-
+        ```  
+  
 
 ### 결과
 1. client에서 보내는 request 입력 및 server로 부터 온 response 출력
