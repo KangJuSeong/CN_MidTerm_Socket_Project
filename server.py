@@ -95,6 +95,7 @@ with socket(AF_INET, SOCK_STREAM) as server_socket:
 
         data = client_socket.recv(SIZE).decode('utf-8')  # client에서 보내는 데이터 받기
         print(data)
+        print('------------------------------------------\n')
         data = data.split('\n')
         method = find_http_method(data[0])
         url = data[1][6:-1]

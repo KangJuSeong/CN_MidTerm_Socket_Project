@@ -23,6 +23,10 @@ test_case = [
     },
     {'url': '127.0.0.1/create',
      'method': 'POST',
+     'body': 'address:seongbukgu'
+    },
+    {'url': '127.0.0.1/create',
+     'method': 'POST',
      'body': 'test'
     },
     {'url': '127.0.0.1/update',
@@ -51,4 +55,5 @@ for test in test_case:
         client_socket.send(request.encode('utf-8'))
         response = client_socket.recv(SIZE).decode('utf-8')
         print(response)
+        print('------------------------------------------\n')
         client_socket.close()
