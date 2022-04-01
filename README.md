@@ -44,6 +44,8 @@
         ```  
   
 
+
+
     - 매개변수로 받은 문자열에서 HTTP method를 추출하는 함수
         ```python
         def find_http_method(line):
