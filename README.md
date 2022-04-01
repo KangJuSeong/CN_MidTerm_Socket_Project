@@ -199,6 +199,44 @@
         SIZE = 1024
         ```
 
+    - test_case 배열에 딕셔너리 형태의 method, url, body를 담은 test case를 저장
+        ```python
+        test_case = [
+            {'url': '127.0.0.1/index.html',
+            'method': 'GET',
+            'body': ''
+            },
+            {'url': '127.0.0.1/test.html',
+            'method': 'GET',
+            'body': ''
+            },
+            {'url': '127.0.0.1/',
+            'method': 'HEAD',
+            'body': ''
+            },
+            {'url': '127.0.0.1/create',
+            'method': 'POST',
+            'body': 'name:kangjuseong'
+            },
+            {'url': '127.0.0.1/create',
+            'method': 'POST',
+            'body': 'test'
+            },
+            {'url': '127.0.0.1/update',
+            'method': 'PUT',
+            'body': 'name:juseong-kang'
+            },
+            {'url': '127.0.0.1/update',
+            'method': 'PUT',
+            'body': 'grade:10'
+            },
+            {'url': '127.0.0.1/test',
+            'method': 'POST',
+            'body': 'test:test'
+            }
+        ]
+        ```
+
 
     - 유저가 요청하는 method와 url 그리고 body 데이터를 매개변수로 받기
     - 받은 값들을 HTTP1.1 포맷에 담아 request 데이터를 return 해주는 함수
@@ -208,24 +246,27 @@
         ```
 
 
+    - request 데이터를 갖고있는 test_case 개수만큼 반복 실행
     - 소켓을 생성하고 IP와 PORT를 설정하여 server socket에 연결
         ```python
-            while True:
+            for test in test_case:
                 with socket(AF_INET, SOCK_STREAM) as client_socket:
                     client_socket.connect((IP, PORT))  # 생성한 소켓에 HOST와 PORT 연결
         ```
 
 
-    - server로 요청할 HTTP method와 url을 입력 받기
-    - 입력 받은 데이터를 인코딩 후 `send()` 메소드를 이용하여 서버로 요청을 전송
+    - server로 요청할 request test case를 `request_formating()` 함수에 인자로 삽입
+    - `request_formating()` 함수에서 반환된 값을 request 변수에 저장
+    - request 데이터를 인코딩 후 `send()` 메소드를 이용하여 서버로 request를 전송
         ```python
-                    method = input("Input method (GET, POST, PUT, HEAD): ")
-                    url = input('Input URL : ')
-                    client_socket.send((method + ',' + url).encode('utf-8'))
-                    print("Sending Request to Server")
+                    method = test['method']
+                    url = test['url']
+                    body = test['body']
+                    request = request_formating(method, body, url)
+                    client_socket.send(request.encode('utf-8'))
         ```
 
-    
+
     - server로 부터 돌아온 응답을 `recv()` 메소드를 통해 받아오기
     - 받아온 response 출력 후 socket 종료
         ```python
@@ -233,7 +274,6 @@
                     print("Response data : ", data)
                     client_socket.close()
         ```
-
 
 
 ### 결과
