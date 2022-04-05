@@ -284,17 +284,14 @@
   
 
 ### 결과
-1. client에서 보내는 request 입력 및 server로 부터 온 response 출력
-![client](./readme_img/client.png)
+1. 좌측은 client로 부터 온 request, 우측은 server로 부터 온 response
+2. post, put 요청 시 데이터를 request body에 넣어 전송, server에서 해당 데이터를 저장 또는 수정하고 현재 저장되어 있는 데이터를 response body에 넣어 전송
+3. 잘못된 요청에 대한 400 or 404 응답
+![img1](./readme_img/img1.png)
+![img2](./readme_img/img2.png)
 
-2. server로 접속된 socket 및 client request에 대한 response 출력
-![server](./readme_img/server.png)
-
- 3. wireshark를 통해 보이는 client와 server(10000)간 통신
-![wireshark1](./readme_img/wireshark1.png)
-![wireshark2](./readme_img/wireshark2.png)
-![wireshark3](./readme_img/wireshark3.png)
-![wireshark4](./readme_img/wireshark4.png)
+ 4. wireshark를 통해 보이는 client와 server(10000)간 통신
+ ![wireshark](./readme_img/wireshark.png)
 
 
 
