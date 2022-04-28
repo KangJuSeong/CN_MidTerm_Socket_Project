@@ -1,5 +1,6 @@
 from socket import *
 import time
+from DBManager import DataBaseManager
 
 
 HOST = "127.0.0.1"
@@ -13,8 +14,6 @@ BAD_REQUEST = 3
 NOT_FOUND = 4
 STATUS_CODE = ['100', '200', '201', '400', '404']
 STATUS_MESSAGE = ['CONTINUE', 'OK', 'CREATED', 'BAD_REQUEST', 'NOT_FOUND']
-
-DB_DATA = {}
 
 
 def find_http_method(line):
@@ -43,10 +42,8 @@ def router(url, method, body):
         host, path = url.split('/')
         if host == HOST:
             if method == 'HEAD': return head()
-            if path == 'index.html':
-                if method == 'GET': return get()
-                else: return response(BAD_REQUEST)
-            elif path == 'create':
+            if method == 'GET': return get()
+            if path == 'create':
                 if method == 'POST': return post(body)
                 else: return response(BAD_REQUEST)
             elif path == 'update':
@@ -59,7 +56,9 @@ def router(url, method, body):
         return response(NOT_FOUND)
 
 def get():
-    return response(OK, body='index.html')
+    dbm = DataBaseManager()
+    res = dbm.selectDB()
+    return response(OK, body=str(res))
 
 def head():
     return response(CONTINUE) 
@@ -67,21 +66,24 @@ def head():
 def post(body):
     body = body.split(':')
     if len(body) == 2:
-        k, v = body[0], body[1]
-        DB_DATA[k] = v
-        return response(CREATED, body=str(DB_DATA))
+        dbm = DataBaseManager()
+        res = dbm.insertDB(body[0], body[1])
+        if type(res) is not str:
+            return response(CREATED, body=str(res))
+        else:
+            return response(BAD_REQUEST, body=res)
     else:
         return response(BAD_REQUEST)
 
 def put(body):
     body = body.split(':')
     if len(body) == 2:
-        k, v = body[0], body[1]
-        if body[0] in DB_DATA.keys():
-            DB_DATA[k] = v
-            return response(OK, body=str(DB_DATA))
+        dbm = DataBaseManager()
+        res = dbm.updateDB(body[0], body[1])
+        if type(res) is not str:
+            return response(OK, body=str(res))
         else:
-            return response(BAD_REQUEST, body='Not Exist Data')
+            return response(BAD_REQUEST, body=res)
     else:
         return response(BAD_REQUEST)
 

@@ -5,43 +5,44 @@ IP = "127.0.0.1"
 PORT = 10000
 SIZE = 1024
 test_case = [
-    {'url': '127.0.0.1/index.html',
-     'method': 'GET',
-     'body': ''
+    {'url': '127.0.0.1/',
+        'method': 'HEAD',
+        'body': ''
     },
-    {'url': '127.0.0.1/test.html',
-     'method': 'GET',
-     'body': ''
+    {'url': '127.0.0.1/create',
+        'method': 'POST',
+        'body': 'name:kangjuseong'
+    },
+    {'url': '127.0.0.1/create',
+        'method': 'POST',
+        'body': 'name:juseong-gang'
+    },
+    {'url': '127.0.0.1/create',
+        'method': 'POST',
+        'body': 'address:seongbukgu'
+    },
+    {'url': '127.0.0.1/create',
+        'method': 'POST',
+        'body': 'test'
     },
     {'url': '127.0.0.1/',
-     'method': 'HEAD',
-     'body': ''
-    },
-    {'url': '127.0.0.1/create',
-     'method': 'POST',
-     'body': 'name:kangjuseong'
-    },
-    {'url': '127.0.0.1/create',
-     'method': 'POST',
-     'body': 'address:seongbukgu'
-    },
-    {'url': '127.0.0.1/create',
-     'method': 'POST',
-     'body': 'test'
+        'method': 'GET',
+        'body': ''
     },
     {'url': '127.0.0.1/update',
-     'method': 'PUT',
-     'body': 'name:juseong-kang'
+        'method': 'PUT',
+        'body': 'name:juseong-kang'
     },
     {'url': '127.0.0.1/update',
-     'method': 'PUT',
-     'body': 'grade:10'
+        'method': 'PUT',
+        'body': 'grade:A'
     },
     {'url': '127.0.0.1/test',
-     'method': 'POST',
-     'body': 'test:test'
+        'method': 'POST',
+        'body': 'age:24'
     }
 ]
+
 def request_formating(method, body, url):
     return f"{method} / HTTP/1.1\r\nHost: {url}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
 
