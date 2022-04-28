@@ -1,6 +1,3 @@
-import json
-
-
 DB_PATH = "./DB.txt"
 
 

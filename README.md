@@ -313,7 +313,95 @@
 
 3. DBManager.py
 
-    - 
+    - DB로 사용할 DB.txt 파일의 경로 저장
+    - txt 파일을 DataBase 처럼 이용할 수 있게 해주는  DataBaseManager 클래스 작성
+    - txt 파일에 문자열 형태로 저장 후 읽을 때는 dict 형태로 변환하여 사용
+    - DataBase 특성 상 primary key를 가져야 하는데 여기서는 key 값을 primary key로 가정
+
+        ```python
+        DB_PATH = "./DB.txt"
+
+
+        class DataBaseManager():
+            def __init__(self):
+                self.db = open(DB_PATH, 'r')
+        ```
+
+    - txt 파일에서 데이터를 읽어오는 함수
+
+        ```python
+            def readData(self):
+                self.db = open(DB_PATH, 'r')
+                data = self.db.readlines()
+                self.disConnect()
+                return data
+        ```
+
+    - txt 파일에 데이터를 쓰는 함수
+
+        ```python
+            def writeData(self, data):
+                self.db = open(DB_PATH, 'w')
+                self.db.write(data정
+                self.disConnect()
+        ```
+
+    - txt 파일에서 읽어 온 데이터를 dict 형태로 변환하여 반환해주는 함수
+
+        ```python
+            def selectDB(self):
+                data = {}
+                read_data = self.readData()
+                for line in read_data:
+                    line = line[:-1]
+                    k, v = line.split(':')
+                    data[k] = v
+                return data
+        ```
+
+    - dict 형태로 반환 된 데이터에 매개변수로 받은 데이터를 추가하고 해당 데이터를 txt 파일에 쓰는 함수
+    - key값이 이미 존재하면 Aleady Exist Data 라는 에러 메시지 반환
+
+        ```python
+            def insertDB(self, insert_k, insert_v):
+                data = self.selectDB() 
+                str_data = ""
+                insert_flag = True
+                for k, v in data.items():
+                    if k == insert_k:
+                        insert_flag = False
+                    str_data += f"{k}:{v}\n"
+                if insert_flag:
+                    str_data += f"{insert_k}:{insert_v}\n"
+                self.writeData(str_data)
+                
+                if insert_flag:
+                    return self.selectDB()
+                else:
+                    return "Aleady Exist Key"
+        ```
+
+    - dict 형태로 반환 된 데이터에 매개변수로 받은 key가 존재하는지 확인 후 존재하면 해당 key의 value를 매개변수로 받은 값으로 수정
+    - DB에 매개변수로 받은 key가 존재하지 않을 경우 Not Exist Key 라는 에러 메시지를 반환
+
+        ```python
+            def updateDB(self, target_k, update_v):
+                data = self.selectDB()
+                str_data = ""
+                update_flag = False
+                for k, v in data.items():
+                    if k == target_k:
+                        str_data += f"{target_k}:{update_v}\n"
+                        update_flag = True
+                    else:
+                        str_data += f"{k}:{v}\n"
+                self.writeData(str_data)
+
+                if update_flag:
+                    return self.selectDB() 
+                else:
+                    return "Not Exist Key
+        ```
 
 
 ### 결과
