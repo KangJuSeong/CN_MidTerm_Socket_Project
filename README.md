@@ -24,9 +24,8 @@
         ```python
         form socket import *
         import time
-        from DBManager import DataBaseManager	
-        ```  
-  
+        from DBManager import DataBaseManager
+        ```
 
     - host와 port, size를 변수에 저장
     - status code와 status message를 배열에 저장
@@ -46,9 +45,6 @@
         STATUS_MESSAGE = ['CONTINUE', 'OK', 'CREATED', 'BAD_REQUEST', 'NOT_FOUND']
 
         ```  
-  
-
-
 
     - 매개변수로 받은 문자열에서 HTTP method를 추출하는 함수
 
@@ -57,7 +53,6 @@
             line = line.split(' ')
             return line[0]
         ```  
-  
 
     - 매개변수로 status code와 status message 그리고 body에 들어갈 값 가져오기
     - 가져온 값을 HTTP1.1 response 양식에 대입하고 해당 response를 return 해주는 함수
@@ -67,7 +62,6 @@
             date = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime(time.time()))
             return f"HTTP/1.1 {status_code} {status_msg}\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\nDate: {date}\r\n\n{body}"
         ```  
-  
 
     - 매개변수로 status와 body를 받아와서 해당 상태에 적절한 response를 return 해주는 함수
 
@@ -84,7 +78,6 @@
             if status == NOT_FOUND:
                 return response_formating(STATUS_CODE[NOT_FOUND], STATUS_MESSAGE[NOT_FOUND], body)
         ```  
-  
 
     - client로 부터 들어온 request를 적절한 path와 method에 연결시켜주는 함수
     - 존재하지 않는 path가 요청되거나 잘못된 method 요청에 대한 처리를 해주는 기능 구현
@@ -108,7 +101,6 @@
             else:
                 return response(NOT_FOUND)
         ```  
-  
 
     - GET method 요청이 들어왔을 때 실행되는 함수
     - DB파일에 있는 데이터를 전부 읽어와서 리턴해주는 `selectDB()` 함수
@@ -120,7 +112,6 @@
             res = dbm.selectDB()
             return response(OK, body=str(res))
         ```  
-  
 
     - HEAD method에 대한 응답 함수
     - body에 추가적인 데이터가 없고 HTTP header만을 보내주고 status 는 CONTINUE
@@ -129,7 +120,6 @@
         def head():
             return response(CONTINUE) 
         ```  
-  
 
     - POST method에 대한 응답 함수
     - POST는 새로운 데이터를 추가하려는 의미로 body로 들어온 데이터를 `insertDB(key, value)` 함수를 통해 추가
@@ -150,7 +140,6 @@
         else:
             return response(BAD_REQUEST)
         ```  
-  
 
     - PUT method에 대한 응답 함수
     - PUT은 기존에 있는 데이터를 변경하는 의미로 body에서 key에 해당하는 value를 `updateDB(key, value)`함수를 통해 수정
@@ -172,7 +161,6 @@
             else:
                 return response(BAD_REQUEST)
         ```  
-  
 
     - 지정한 HOST와 PORT를 이용하여 socket을 생성
     - `listen(1)` 메서드를 통해 socket 대기 상태
@@ -182,7 +170,6 @@
             server_socket.bind((HOST, PORT))  # 생성한 소켓에 HOST와 PORT 바인딩
             server_socket.listen(1)  # 소켓 연결 대기 상태
         ```  
-  
 
     - `accept()` 메소드를 통해 연결된 client의 socket과 address 저장
     - `recv(SIZE)` 메소드를 통해 client에서 보낸 HTTP request를 data변수에 저장
@@ -204,7 +191,6 @@
 
                 client_socket.send(response.encode('utf-8'))  # 데이터 인코딩하여 보내기
         ```  
-  
 
 2. client.py
 
@@ -213,7 +199,6 @@
         ```python
         form socket import *
         ```  
-  
 
     - 연결할 서버의 IP와 PORT를 변수에 저장
     - 데이터 사이즈를 SIZE 변수에 저장
@@ -223,7 +208,6 @@
         PORT = 10000
         SIZE = 1024
         ```  
-
 
     - test_case 배열에 딕셔너리 형태의 method, url, body를 담은 test case를 저장
 
@@ -267,7 +251,6 @@
             }
         ]
         ```  
-  
 
     - 유저가 요청하는 method와 url 그리고 body 데이터를 매개변수로 받기
     - 받은 값들을 HTTP1.1 포맷에 담아 request 데이터를 return 해주는 함수
@@ -276,7 +259,6 @@
         def request_formating(method, body, url):
             return f"{method} / HTTP/1.1\r\nHost: {url}\r\nAccept: text/html\r\nContent-Type: text/html\r\nConnection: keep-alive\r\nContent-Length: {len(body)}\r\n\n{body}"
         ```  
-  
 
     - request 데이터를 갖고있는 test_case 개수만큼 반복 실행
     - 소켓을 생성하고 IP와 PORT를 설정하여 server socket에 연결
@@ -286,7 +268,6 @@
                 with socket(AF_INET, SOCK_STREAM) as client_socket:
                     client_socket.connect((IP, PORT))  # 생성한 소켓에 HOST와 PORT 연결
         ```  
-  
 
     - server로 요청할 request test case를 `request_formating()` 함수에 인자로 삽입
     - `request_formating()` 함수에서 반환된 값을 request 변수에 저장
@@ -299,7 +280,6 @@
                     request = request_formating(method, body, url)
                     client_socket.send(request.encode('utf-8'))
         ```  
-  
 
     - server로 부터 돌아온 응답을 `recv()` 메소드를 통해 받아오기
     - 받아온 response 출력 후 socket 종료
@@ -309,7 +289,6 @@
                     print("Response data : ", data)
                     client_socket.close()
         ```  
-
 
 3. DBManager.py
 
@@ -403,18 +382,61 @@
                     return "Not Exist Key
         ```
 
-
 ### 결과
+
 1. 좌측은 client로 부터 온 request, 우측은 server로 부터 온 response
 2. post, put 요청 시 데이터를 request body에 넣어 전송, server에서 해당 데이터를 저장 또는 수정하고 현재 저장되어 있는 데이터를 response body에 넣어 전송
 3. 잘못된 요청에 대한 400 or 404 응답
-![img1](./readme_img/img1.png)
-![img2](./readme_img/img2.png)
 
- 4. wireshark를 통해 보이는 client와 server(10000)간 통신
+    - case 1
+        - HEAD method 요청과 그에 대한 응답
+        - HEAD는 response에 header만 표시하며 보통 서버가 열려있는지 확인하는 용도로 사용
+        ![test_case1](./readme_img/test_case1.png)
+
+    - case 2
+        - POST method 요청과 그에 대한 응답
+        - POST는 client가 body에 데이터를 넣고 요청하면 server에서 해당 데이터를 DB로 추가하는 용도로 사용
+        - 데이터 추가가 잘 되었다면 201 CREATED 라는 상태 코드와 상태 메시지가 응답으로 반환
+        - 응답에 body에 있는 데이터는 추가하려는 데이터가 잘 들어갔는지 확인하기 위해 전체 데이터를 server에서 반환
+        ![test_case2](./readme_img/test_case2.png)
+
+    - case 3
+        - POST method 요청과 그에 대한 응답
+        - 추가하려는 데이터가 이미 존재하기 때문에 추가할 수 없어 응답으로 400 BAD_REQUEST가 반환된것을 확인
+        - 응답 body에는 어떤 이유로 요청이 실패했는지 에러 메시지 출력
+        ![test_case3](./readme_img/test_case3.png)
+
+    - case 4
+        - case 2와 동일하게 POST method를 통해 body에 있는 데이터를 DB에 추가
+        - 응답 코드와 메시지로 201 CREATED 가 반환 된것을 확인
+        - 응답 body를 통해 데이터가 잘 추가된 것을 확인
+        ![test_case4](./readme_img/test_case4.png)
+
+    - case 5
+        - case 2와 요청 method는 동일하지만 body에 있는 데이터가 server에서 원하는 데이터 양식과 달라 BAD_REQUEST가 반환된 것을 확인
+        ![test_case5](./readme_img/test_case5.png)
+
+    - case 6
+        - GET method 요청과 그에 대한 응답
+        - GET은 DB에 있는 데이터를 읽어 오는 용도로 사용
+        - 이전에 POST로 추가했던 데이터들을 가져와서 응답 body를 통해 반환
+        ![test_case6](./readme_img/test_case6.png)
+
+    - case 7
+        - PUT method 요청과 그에 대한 응답
+        - PUT은 DB에 있는 데이터를 client가 보낸 데이터로 수정하는 용도로 사용
+        - client가 보낸 데이터의 key에 해당하는 DB의 value를 client가 보낸 value로 수정
+        - 수정이 잘 되었는지 확인하기 위해 DB의 데이터를 응답 body에 담아 반환
+        ![test_case7](./readme_img/test_case7.png)
+
+    - case 8
+        - case 7과 요청 method는 동일하지만 DB에서 grade라는 key를 가진 데이터는 없으므로 수정할 수 없기 때문에 BAD_REQUEST가 반환된 것을 확인
+        - 응답 body에는 요청이 실패한 이유를 알려주는 에러 메시지가 반환
+        ![test_case8](./readme_img/test_case8.png)
+
+    - case 9
+        - POST method를 요청했지만 host 뒤에 붙은 path는 server의 router에서 처리하고 있지 않는 path 이므로 NOT_FOUND가 반환된 것을 확인
+        ![test_case6](./readme_img/test_case6.png)
+
+4. wireshark를 통해 보이는 client와 server(10000)간 통신
  ![wireshark](./readme_img/wireshark.png)
-
-
-
-
-
