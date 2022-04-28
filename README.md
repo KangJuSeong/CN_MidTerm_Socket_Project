@@ -12,7 +12,14 @@
 - client는 server로부터 받은 응답을 출력
 - server에서 client로부터 요청에 대한 적절한 응답 코드와 응답 메시지 보내기
 - 데이터베이스를 대신 해서 txt파일을 통해 데이터를 읽고 저장
-    
+
+### 동작 환경
+
+- python 3.9
+- server.py와 client.py를 분리하여 실행
+- server.py에서 port는 10000을 사용하고 localhost로 실행
+- server.py가 실행 중이면 client.py를 실행하여 터미널에 출력되는 결과 확인
+
 ### 코드
 
 1. server.py
